@@ -1,2 +1,1 @@
-# AirBnB Clone
-
+# AirBnB Clone - The Console
