@@ -1,130 +1,311 @@
 #!/usr/bin/python3
-""" Module containing Review View """
-from api.v1.views import app_views
-from flask import jsonify, abort, request
-from models import storage
-from models.review import Review
+"""
+Review model hold the endpoint (route) and their respective view functions
+"""
+from api.v1.views import (app_views, Review, storage)
+from flask import (abort, jsonify, request)
 
 
-@app_views.route('/places/<string:place_id>/reviews', methods=['GET'],
+@app_views.route("/places/<place_id>/reviews", methods=["GET"],
                  strict_slashes=False)
-def get_reviews(place_id):
-    """ Retrieves the list of all Review objects associated with a Place
-        object.
-
-    Args:
-        place_id (str): The UUID4 string representing a Place object.
-
-    Returns:
-        List of dictionaries representing Review objects in JSON format.
-        404 error if `place_id` is not linked to any Place object.
+def all_reviews(place_id):
+    """Example endpoint returning a list of all reviews
+    Retrieves a list of all reviews associated with a place
+    ---
+    parameters:
+      - name: place_id
+        in: path
+        type: string
+        enum: ['279b355e-ff9a-4b85-8114-6db7ad2a4cd2']
+        required: true
+        default: '279b355e-ff9a-4b85-8114-6db7ad2a4cd2'
+    definitions:
+      State:
+        type: object
+        properties:
+          __class__:
+            type: string
+            description: The string of class object
+          created_at:
+            type: string
+            description: The date the object created
+          id:
+            type: string
+            description: the id of the review
+          place_id:
+            type: string
+            description: the id of the place
+          text:
+            type: string
+            description: the text of the review
+          updated_at:
+            type: string
+            description: The date the object was updated
+          user_id:
+            type: string
+            description: The user id
+            items:
+              $ref: '#/definitions/Color'
+      Color:
+        type: string
+    responses:
+      200:
+        description: A list of dictionaries of all reviews objects
+        schema:
+          $ref: '#/definitions/State'
+        examples:
+            [{"__class__": "Review",
+              "created_at": "2017-03-25T02:17:07",
+              "id": "3f54d114-582d-4dab-8559-f0682dbf1fa6",
+              "place_id": "279b355e-ff9a-4b85-8114-6db7ad2a4cd2",
+              "text": "Really nice place and really nice people. Secluded.",
+              "updated_at": "2017-03-25T02:17:07",
+              "user_id": "887dcd8d-d5ee-48de-9626-73ff4ea732fa"}]
     """
-    place_obj = storage.get("Place", place_id)
-    if place_obj is None:
+    place = storage.get("Place", place_id)
+    if place is None:
         abort(404)
-    reviews = [review.to_dict() for review in place_obj.reviews]
+    reviews = [review.to_json() for review in place.reviews]
     return jsonify(reviews)
 
 
-@app_views.route('/reviews/<string:review_id>', methods=['GET'],
+@app_views.route("/reviews/<review_id>", methods=["GET"],
                  strict_slashes=False)
-def get_review(review_id):
-    """ Retrieves a Review object based on `review_id`.
-
-    Args:
-        review_id (str): The UUID4 string representing a review object.
-
-    Returns:
-        Dictionary represention of a Review object in JSON format.
-        404 error if `review_id` is not linked to any Review object.
+def one_review(review_id):
+    """Example endpoint returning a list of one reivew
+    Retrieves a list of one review associated with a place
+    ---
+    parameters:
+      - name: place_id
+        in: path
+        type: string
+        enum: ["3f54d114-582d-4dab-8559-f0682dbf1fa6"]
+        required: true
+        default: "3f54d114-582d-4dab-8559-f0682dbf1fa6"
+    definitions:
+      State:
+        type: object
+        properties:
+          __class__:
+            type: string
+            description: The string of class object
+          created_at:
+            type: string
+            description: The date the object created
+          id:
+            type: string
+            description: the id of the review
+          place_id:
+            type: string
+            description: the id of the place
+          text:
+            type: string
+            description: written review
+          updated_at:
+            type: string
+            description: The date the object was updated
+          user_id:
+            type: string
+            description: The user id
+            items:
+              $ref: '#/definitions/Color'
+      Color:
+        type: string
+    responses:
+      200:
+        description: A list of a dictionary of a Review objects
+        schema:
+          $ref: '#/definitions/State'
+        examples:
+            [{"__class__": "Review",
+              "created_at": "2017-03-25T02:17:07",
+              "id": "3f54d114-582d-4dab-8559-f0682dbf1fa6",
+              "place_id": "279b355e-ff9a-4b85-8114-6db7ad2a4cd2",
+              "text": "Really nice place and really nice people. Secluded.",
+              "updated_at": "2017-03-25T02:17:07",
+              "user_id": "887dcd8d-d5ee-48de-9626-73ff4ea732fa"}]
     """
-    review_obj = storage.get("Review", review_id)
-    if review_obj is None:
+    review = storage.get("Review", review_id)
+    if review is None:
         abort(404)
-    return jsonify(review_obj.to_dict())
+    return jsonify(review.to_json())
 
 
-@app_views.route('/reviews/<string:review_id>', methods=['DELETE'],
+@app_views.route("/reviews/<review_id>", methods=["DELETE"],
                  strict_slashes=False)
-def delete_review(review_id):
-    """ Deletes a Review object based on `review_id`.
+def delete_one_review(review_id):
+    """Example endpoint deleting one review
+    Deletes a review based on the place_id
+    ---
+    definitions:
+      Review:
+        type: object
+      Color:
+        type: string
+      items:
+        $ref: '#/definitions/Color'
 
-    Args:
-        review_id (str): The UUID4 string representing a Review object.
-
-    Returns:
-        Returns an empty dictionary with the status code 200.
-        404 error if `review_id` is not linked to any Review object.
+    responses:
+      200:
+        description: An empty dictionary
+        schema:
+          $ref: '#/definitions/City'
+        examples:
+            {}
     """
-    review_obj = storage.get("Review", review_id)
-    if review_obj is None:
+    review = storage.get("Review", review_id)
+    if review is None:
         abort(404)
-    review_obj.delete()
-    storage.save()
-    return jsonify({})
+    storage.delete(review)
+    return jsonify({}), 200
 
 
-@app_views.route('/places/<string:place_id>/reviews', methods=['POST'],
+@app_views.route("/places/<place_id>/reviews", methods=["POST"],
                  strict_slashes=False)
-def add_review(place_id):
-    """ Creates a Review object to associate to a Place object with the HTTP
-        body request fields as the values to set the Review object with.
-
-    Args:
-        place_id (str): The UUID4 string representing a Place object the new
-        Review object will be associated to.
-
-    Returns:
-        Returns the new Review object as a  dictionary in JSON format
-        with the status code 201.
-        400 error if HTTP body request is not a valid JSON or if the dictionary
-        passed does not contain the key `email` and/or `password`.
-        404 error if `place_id` is not linked to any Place object.
+def create_review(place_id):
+    """Example endpoint creates one review
+    Creates one review associated with a place_id based on the JSON body
+    ---
+    parameters:
+      - name: place_id
+        in: path
+        type: string
+        enum: ["3f54d114-582d-4dab-8559-f0682dbf1fa6"]
+        required: true
+        default: "3f54d114-582d-4dab-8559-f0682dbf1fa6"
+    definitions:
+      State:
+        type: object
+        properties:
+          __class__:
+            type: string
+            description: The string of class object
+          created_at:
+            type: string
+            description: The date the object created
+          id:
+            type: string
+            description: the id of the review
+          place_id:
+            type: string
+            description: the id of the place
+          text:
+            type: string
+            description: written review
+          updated_at:
+            type: string
+            description: The date the object was updated
+          user_id:
+            type: string
+            description: The user id
+            items:
+              $ref: '#/definitions/Color'
+      Color:
+        type: string
+    responses:
+      201:
+        description: A list of a dictionary of a Review objects
+        schema:
+          $ref: '#/definitions/State'
+        examples:
+            [{"__class__": "Review",
+              "created_at": "2017-03-25T02:17:07",
+              "id": "3f54d114-582d-4dab-8559-f0682dbf1fa6",
+              "place_id": "279b355e-ff9a-4b85-8114-6db7ad2a4cd2",
+              "text": "Really nice place and really nice people. Secluded.",
+              "updated_at": "2017-03-25T02:17:07",
+              "user_id": "887dcd8d-d5ee-48de-9626-73ff4ea732fa"}]
     """
-    place_obj = storage.get("Place", place_id)
-    if place_obj is None:
-        abort(404)
-    if request.json is None:
+    try:
+        r = request.get_json()
+    except:
+        r = None
+    if r is None:
         return "Not a JSON", 400
-    fields = request.get_json()
-    u_id = fields.get('user_id')
-    if u_id is None:
+    if "user_id" not in r.keys():
         return "Missing user_id", 400
-    if storage.get("User", u_id) is None:
-        abort(404)
-    if fields.get('text') is None:
+    if "text" not in r.keys():
         return "Missing text", 400
-    fields["place_id"] = place_id
-    new_review = Review(**fields)
-    new_review.save()
-    """ May need to call `get` on new_user for all attributes to show """
-    return jsonify(new_review.to_dict()), 201
-
-
-@app_views.route('/reviews/<string:review_id>', methods=['PUT'],
-                 strict_slashes=False)
-def edit_review(review_id):
-    """ Edit a Review object using `review_id` and HTTP body request fields.
-
-    Args:
-        review_id (str): The UUID4 string representing a Review object.
-
-    Returns:
-        Returns the Review object as a dictionary in JSON format with the
-        status code 200.
-        400 error if the HTTP body request is not a valid JSON.
-        404 error if `review_id` is not linked to a Reivew object.
-    """
-    review_obj = storage.get("Review", review_id)
-    if review_obj is None:
+    place = storage.get("Place", place_id)
+    if place is None:
         abort(404)
-    if request.json is None:
+    user = storage.get("User", r["user_id"])
+    if user is None:
+        abort(404)
+    review = Review(**r)
+    review.place_id = place_id
+    review.save()
+    return jsonify(review.to_json()), 201
+
+
+@app_views.route("/reviews/<review_id>", methods=["PUT"],
+                 strict_slashes=False)
+def update_review(review_id):
+    """Example endpoint creates one review
+    Creates one review associated with a place_id based on the JSON body
+    ---
+    parameters:
+      - name: place_id
+        in: path
+        type: string
+        enum: ["3f54d114-582d-4dab-8559-f0682dbf1fa6"]
+        required: true
+        default: "3f54d114-582d-4dab-8559-f0682dbf1fa6"
+    definitions:
+      State:
+        type: object
+        properties:
+          __class__:
+            type: string
+            description: The string of class object
+          created_at:
+            type: string
+            description: The date the object created
+          id:
+            type: string
+            description: the id of the review
+          place_id:
+            type: string
+            description: the id of the place
+          text:
+            type: string
+            description: written review
+          updated_at:
+            type: string
+            description: The date the object was updated
+          user_id:
+            type: string
+            description: The user id
+            items:
+              $ref: '#/definitions/Color'
+      Color:
+        type: string
+    responses:
+      200:
+        description: A list of a dictionary of a Review objects
+        schema:
+          $ref: '#/definitions/State'
+        examples:
+            [{"__class__": "Review",
+              "created_at": "2017-03-25T02:17:07",
+              "id": "3f54d114-582d-4dab-8559-f0682dbf1fa6",
+              "place_id": "279b355e-ff9a-4b85-8114-6db7ad2a4cd2",
+              "text": "Really nice place and really nice people. Secluded.",
+              "updated_at": "2017-03-25T02:17:07",
+              "user_id": "887dcd8d-d5ee-48de-9626-73ff4ea732fa"}]
+    """
+    review = storage.get("Review", review_id)
+    if review is None:
+        abort(404)
+    try:
+        r = request.get_json()
+    except:
+        r = None
+    if r is None:
         return "Not a JSON", 400
-    fields = request.get_json()
-    for key in fields:
-        if key in ['id', 'user_id', 'place_id', 'created_at', 'update_at']:
-            continue
-        if hasattr(review_obj, key):
-            setattr(review_obj, key, fields[key])
-    review_obj.save()
-    return jsonify(review_obj.to_dict()), 200
+    for k in ("id", "user_id", "place_id", "created_at", "updated_at"):
+        r.pop(k, None)
+    for key, value in r.items():
+        setattr(review, key, value)
+    review.save()
+    return jsonify(review.to_json()), 200
