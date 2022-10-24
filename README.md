@@ -131,7 +131,7 @@ TestBaseModel class:
 
 ## Authors
 NathnaelTeketel - [Github](https://github.com/nathnaeltk) 
-Yoseph Mekonnen - [Github](https://github.com/geekboiii) 
+Yoseph Mekonnen - [Github](https://github.com/geekbooi) 
 
 
 ## License
